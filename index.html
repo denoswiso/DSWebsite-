@@ -6,308 +6,139 @@
     <title>Dennis Dörflinger - Portfolio</title>
     <style>
         body, html {
-            height: 100%;
             margin: 0;
             padding: 0;
             font-family: Arial, sans-serif;
             background-color: #ffffff;
             color: #000000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
         }
         .container {
-            width: 90%;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px 0;
-            border-bottom: 1px solid #e0e0e0;
-            flex-wrap: wrap;
-        }
-        .logo {
-            font-size: 18px;
-            font-weight: bold;
-        }
-        nav {
-            display: flex;
-            flex-wrap: wrap;
-        }
-        nav a {
-            margin-left: 20px;
-            text-decoration: none;
-            color: #000000;
-            font-size: 14px;
-        }
-        .main-content {
+            width: 100%;
+            max-width: 400px;
             text-align: center;
-            padding: 100px 0;
         }
-        h1 {
-            font-size: 64px;
-            font-weight: bold;
+        canvas {
+            border: 1px solid black;
+        }
+        #score {
             margin-bottom: 10px;
-            letter-spacing: -2px;
-        }
-        .subtitle {
-            font-size: 18px;
-            color: #555555;
-        }
-        .message {
-            text-align: center;
-            font-size: 16px;
-            margin: 20px 0;
-        }
-        .overlay {
-            display: none;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            text-align: center;
-            background-color: rgba(0, 0, 0, 0.8);
-            padding: 20px;
-            border-radius: 10px;
-            color: white;
-        }
-        .overlay.active {
-            display: block;
-        }
-        .btn {
-            margin-top: 20px;
-            padding: 10px 20px;
-            background-color: #ff4081;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        .btn:hover {
-            background-color: #e91e63;
-        }
-        .gameOverGrid {
-            margin-bottom: 20px;
-        }
-        #gameBoard {
-            display: grid;
-            grid-template-rows: repeat(20, 20px);
-            grid-template-columns: repeat(20, 20px);
-            gap: 1px;
-            background-color: #ccc;
-            margin: 20px auto;
-        }
-        .pixel {
-            width: 20px;
-            height: 20px;
-            background-color: #fff;
-        }
-        .pixel.snake {
-            background-color: #000;
-        }
-        .pixel.food {
-            background-color: #f00;
-        }
-
-        @media (max-width: 768px) {
-            header {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-            nav {
-                margin-top: 20px;
-            }
-            nav a {
-                margin: 10px 20px 0 0;
-            }
-            h1 {
-                font-size: 48px;
-            }
-            .main-content {
-                padding: 50px 0;
-            }
-        }
-
-        @media (max-width: 480px) {
-            h1 {
-                font-size: 36px;
-            }
-            .subtitle {
-                font-size: 16px;
-            }
+            font-size: 24px;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <header>
-            <div class="logo">Dennis Dörflinger</div>
-            <nav>
-                <a href="#work">WORK</a>
-                <a href="#about">ABOUT</a>
-                <a href="#contact">CONTACT</a>
-                <a href="#login">LOGIN</a>
-            </nav>
+        <header class="title">
+            <h3 id="score">Score: 0</h3>
         </header>
-        <div class="main-content">
-            <h1>DENNISSWISS</h1>
-            <p class="subtitle">PHOTOGRAPHY | VIDEOGRAPHY</p>
-        </div>
-        <div class="message">
-            <p>Hang tight while I put the final touches on my new website! In the meantime, why not slither into some fun with a game of snake? Enjoy!</p>
-        </div>
-        <div class="container">
-            <header class="title">
-                <h3 id="score">Score: 0</h3>
-            </header>
-        </div>
-        <div class="container">
-            <section class="overlay" id="overlay">
-                <div class="gameOverGrid">
-                    <h3 id="gameOver">You lose!</h3>
-                </div>
-                <button class="gameOverGrid btn classic-submit" onclick="startGame()">Play</button>
-            </section>
-            <section id="gameBoard">
-                <!-- Game pixels will be generated here -->
-            </section>
-        </div>
+        <canvas id="gameCanvas" width="400" height="400"></canvas>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
     <script>
-        function launchConfetti() {
-            confetti({
-                particleCount: 500,
-                spread: 160,
-                startVelocity: 30,
-                origin: { y: 0.7 }
-            });
-        }
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
 
-        window.onload = () => {
-            launchConfetti();
-            startGame();
-        };
-
-        const gameBoard = document.getElementById('gameBoard');
-        const scoreDisplay = document.getElementById('score');
-        const overlay = document.getElementById('overlay');
-
-        let snake = [{ x: 10, y: 10 }];
-        let direction = { x: 0, y: 0 };
-        let food = { x: 15, y: 15 };
+        const gridSize = 20;
+        const tileCount = canvas.width / gridSize;
+        let snake = [{x: 10, y: 10}];
+        let food = {x: 15, y: 15};
+        let dx = 0;
+        let dy = 0;
         let score = 0;
-        let gameInterval;
 
-        function createBoard() {
-            gameBoard.innerHTML = '';
-            for (let i = 0; i < 20; i++) {
-                for (let j = 0; j < 20; j++) {
-                    const pixel = document.createElement('div');
-                    pixel.classList.add('pixel');
-                    gameBoard.appendChild(pixel);
-                }
+        function drawGame() {
+            clearCanvas();
+            moveSnake();
+            drawSnake();
+            drawFood();
+            drawScore();
+
+            if (checkCollision()) {
+                gameOver();
+                return;
             }
+
+            setTimeout(drawGame, 100);
         }
 
-        function drawSnake() {
-            snake.forEach(segment => {
-                const index = segment.y * 20 + segment.x;
-                const pixel = gameBoard.children[index];
-                pixel.classList.add('snake');
-            });
-        }
-
-        function drawFood() {
-            const index = food.y * 20 + food.x;
-            const pixel = gameBoard.children[index];
-            pixel.classList.add('food');
+        function clearCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
         }
 
         function moveSnake() {
-            const head = { x: snake[0].x + direction.x, y: snake[0].y + direction.y };
+            const head = {x: snake[0].x + dx, y: snake[0].y + dy};
             snake.unshift(head);
 
             if (head.x === food.x && head.y === food.y) {
                 score++;
-                scoreDisplay.innerText = `Score: ${score}`;
-                placeFood();
+                generateFood();
             } else {
                 snake.pop();
             }
         }
 
-        function placeFood() {
-            food = {
-                x: Math.floor(Math.random() * 20),
-                y: Math.floor(Math.random() * 20)
-            };
-            if (snake.some(segment => segment.x === food.x && segment.y === food.y)) {
-                placeFood();
-            }
+        function drawSnake() {
+            ctx.fillStyle = 'black';
+            snake.forEach(segment => {
+                ctx.fillRect(segment.x * gridSize, segment.y * gridSize, gridSize - 2, gridSize - 2);
+            });
+        }
+
+        function drawFood() {
+            ctx.fillStyle = 'red';
+            ctx.fillRect(food.x * gridSize, food.y * gridSize, gridSize - 2, gridSize - 2);
+        }
+
+        function drawScore() {
+            document.getElementById('score').innerText = `Score: ${score}`;
+        }
+
+        function generateFood() {
+            food.x = Math.floor(Math.random() * tileCount);
+            food.y = Math.floor(Math.random() * tileCount);
         }
 
         function checkCollision() {
             const head = snake[0];
-
-            if (head.x < 0 || head.x >= 20 || head.y < 0 || head.y >= 20) {
-                return true;
-            }
-
-            for (let i = 1; i < snake.length; i++) {
-                if (snake[i].x === head.x && snake[i].y === head.y) {
-                    return true;
-                }
-            }
-
-            return false;
+            return (
+                head.x < 0 || head.x >= tileCount ||
+                head.y < 0 || head.y >= tileCount ||
+                snake.slice(1).some(segment => segment.x === head.x && segment.y === head.y)
+            );
         }
 
         function gameOver() {
-            clearInterval(gameInterval);
-            overlay.classList.add('active');
-        }
-
-        function startGame() {
-            snake = [{ x: 10, y: 10 }];
-            direction = { x: 0, y: 0 };
-            score = 0;
-            scoreDisplay.innerText = `Score: 0`;
-            placeFood();
-            overlay.classList.remove('active');
-            createBoard();
-            drawSnake();
-            drawFood();
-            gameInterval = setInterval(() => {
-                moveSnake();
-                if (checkCollision()) {
-                    gameOver();
-                } else {
-                    createBoard();
-                    drawSnake();
-                    drawFood();
-                }
-            }, 200);
+            ctx.fillStyle = 'black';
+            ctx.font = '30px Arial';
+            ctx.fillText('Game Over!', canvas.width / 2 - 70, canvas.height / 2);
         }
 
         document.addEventListener('keydown', (e) => {
-            switch (e.key) {
-                case 'ArrowUp':
-                    if (direction.y === 0) direction = { x: 0, y: -1 };
-                    break;
-                case 'ArrowDown':
-                    if (direction.y === 0) direction = { x: 0, y: 1 };
-                    break;
-                case 'ArrowLeft':
-                    if (direction.x === 0) direction = { x: -1, y: 0 };
-                    break;
-                case 'ArrowRight':
-                    if (direction.x === 0) direction = { x: 1, y: 0 };
-                    break;
+            switch(e.key) {
+                case 'ArrowUp': if (dy === 0) {dx = 0; dy = -1;} break;
+                case 'ArrowDown': if (dy === 0) {dx = 0; dy = 1;} break;
+                case 'ArrowLeft': if (dx === 0) {dx = -1; dy = 0;} break;
+                case 'ArrowRight': if (dx === 0) {dx = 1; dy = 0;} break;
             }
         });
+
+        drawGame();
+
+        // Confetti effect
+        document.addEventListener('DOMContentLoaded', () => {
+            const confettiSettings = { target: 'confettiCanvas' };
+            const confetti = new ConfettiGenerator(confettiSettings);
+            confetti.render();
+
+            setTimeout(() => confetti.clear(), 5000);
+        });
     </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/confetti-js@0.0.18/dist/index.min.js"></script>
 </body>
 </html>
