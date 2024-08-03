@@ -111,11 +111,12 @@
             <p class="subtitle">PHOTOGRAPHY | VIDEOGRAPHY</p>
         </div>
         <div class="message">
-            <p>Hang tight while I put the final touches on this website! In the meantime, why not slither into some fun with a game of snake? Enjoy!</p>
+            <p>Hang tight while I put the final touches on my new website! In the meantime, why not slither into some fun with a game of snake? Enjoy!</p>
         </div>
         <canvas id="gameCanvas" width="400" height="400"></canvas>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
     <script>
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
@@ -207,7 +208,19 @@
             }
         });
 
-        drawGame();
+        // Initialize and launch confetti
+        function launchConfetti() {
+            confetti({
+                particleCount: 100,
+                spread: 70,
+                origin: { y: 0.6 }
+            });
+        }
+
+        window.onload = () => {
+            launchConfetti();
+            drawGame();
+        };
     </script>
 </body>
 </html>
