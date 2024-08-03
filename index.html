@@ -215,18 +215,25 @@
             }
         });
 
-        drawGame();
+        function startGame() {
+            drawGame();
+        }
     </script>
-
-    <script src="https://cdn.jsdelivr.net/npm/confetti-js@0.0.18/dist/index.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const confettiSettings = { target: 'confettiCanvas' };
-            const confetti = new ConfettiGenerator(confettiSettings);
-            confetti.render();
+        function launchConfetti() {
+            confetti({
+                particleCount: 500,
+                spread: 160,
+                startVelocity: 30,
+                origin: { y: 0.7 }
+            });
+        }
 
-            setTimeout(() => confetti.clear(), 5000);
-        });
+        window.onload = () => {
+            launchConfetti();
+            startGame();
+        };
     </script>
 </body>
 </html>
