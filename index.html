@@ -44,7 +44,6 @@
         .main-content {
             text-align: center;
             padding: 100px 0;
-            border-bottom: 1px solid #e0e0e0;
         }
         h1 {
             font-size: 64px;
@@ -60,12 +59,6 @@
             text-align: center;
             font-size: 16px;
             margin: 20px 0;
-        }
-        .container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
         }
         .overlay {
             display: none;
@@ -103,9 +96,7 @@
             grid-template-columns: repeat(20, 20px);
             gap: 1px;
             background-color: #ccc;
-        }
-        .row {
-            display: flex;
+            margin: 20px auto;
         }
         .pixel {
             width: 20px;
@@ -171,7 +162,6 @@
                 <h3 id="score">Score: 0</h3>
             </header>
         </div>
-
         <div class="container">
             <section class="overlay" id="overlay">
                 <div class="gameOverGrid">
@@ -189,9 +179,10 @@
     <script>
         function launchConfetti() {
             confetti({
-                particleCount: 300,
-                spread: 90,
-                origin: { y: 0.6 }
+                particleCount: 500,
+                spread: 160,
+                startVelocity: 30,
+                origin: { y: 0.7 }
             });
         }
 
@@ -308,4 +299,15 @@
                     break;
                 case 'ArrowDown':
                     if (direction.y === 0) direction = { x: 0, y: 1 };
-                    break
+                    break;
+                case 'ArrowLeft':
+                    if (direction.x === 0) direction = { x: -1, y: 0 };
+                    break;
+                case 'ArrowRight':
+                    if (direction.x === 0) direction = { x: 1, y: 0 };
+                    break;
+            }
+        });
+    </script>
+</body>
+</html>
